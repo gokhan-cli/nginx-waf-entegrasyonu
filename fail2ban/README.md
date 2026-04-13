@@ -1,4 +1,4 @@
-### 4. Fail2Ban Kurulumu ve Özel Jail Tanımlanması
+### 4. Fail2Ban Kurulumu ve Özel Jail ve Filtre Tanımlanması
 
 Son olarak, engelleme mekanizması için işletim sistemine `fail2ban` kurun:
 
