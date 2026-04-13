@@ -1,16 +1,13 @@
 ### 4. Fail2Ban Kurulumu ve Özel Jail Tanımlanması
 
-Son olarak, engelleme mekanizması için işletim sistemine `fail2ban` kurun:
+# Engelleme mekanizması için işletim sistemine `fail2ban` kurun:
 
-```bash
 sudo apt install fail2ban -y
 sudo systemctl enable fail2ban
 sudo systemctl start fail2ban
-```
 
 Bu repo dizinindeki (veya kendi belirlediğiniz) Fail2Ban konfigürasyon dosyalarını `/etc/fail2ban/` klasörüne kopyalayarak OpenAppSec loglarını dinlemesini sağlayın:
 
-```bash
 git clone https://github.com/KULLANICI_ADINIZ/nginx-nginxui-waf-fail2ban-stack.git
 cd nginx-nginxui-waf-fail2ban-stack
 
@@ -19,7 +16,6 @@ sudo cp fail2ban/filter.d/openappsec.conf /etc/fail2ban/filter.d/
 
 # Kuralların aktif olması için servisi yeniden başlatın
 sudo systemctl restart fail2ban
-```
 
 ## ⚙️ Yapılandırma Detayları
 
