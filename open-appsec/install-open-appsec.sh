@@ -9,7 +9,4 @@ wget https://downloads.openappsec.io/open-appsec-install && chmod +x open-appsec
 sudo ./open-appsec-install --auto # Download modda kurulum aşamasında hata almamak için kurulumu önce bu modda çalıştırın.
 sudo ./open-appsec-install --download # OpenAppSec yerelde çalışağı için biz bu modu kullanacağız.
 
-# (İndirilen paketi sisteminize göre genişleterek kurulum dosyasından
-# yerel yönetim (Local Management / Declarative) seçeneğiyle entegrasyonu tamamlayın.)
-# *(Not: Kurulum download modunda ve tamamen "local" yapıldığından,
-# WAF konfigürasyonunuz ve tespit kurallarınız sunucunuz üzerindeki yerel politika dosyası (`local_policy.yaml`) aracılığıyla yönetilecektir. Entegrasyon tamamlandığında eklenti `nginx.conf` içerisine gömülecektir.)*
+#Eğer yukarıdaki script ile kurulumda sorun yaşarsanız buradaki dosyayı open-appsec-install kullanabilirsiniz.
