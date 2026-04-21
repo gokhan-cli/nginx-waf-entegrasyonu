@@ -80,8 +80,6 @@ sudo cscli scenarios list
 
 Test etmek için dışarıdan open-appsec'e bir XSS veya SQLi atın. `tail -f /var/log/crowdsec/crowdsec.log` dosyasında `custom/open-appsec-prevent` tetiklenmiş mi diye görebilirsiniz. `sudo cscli decisions list` yazınca da göreceksiniz.
 
----
-
 ## 6. Web Yönetim Paneli İçin Sudoers Ayarı
 
 Geliştirdiğim şık yönetim panelini (`app.py`) çalıştıracak olan kullanıcı (`ubuntu` veya `www-data` kimse) parola sormadan `cscli` komutunu çalıştırabilmelidir, aksi halde web panelinden ban kaldıramaz.
