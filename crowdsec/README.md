@@ -107,7 +107,7 @@ Sonra tarayıcınızdan `http://SUNUCU_IP:5001` adresine giderek muazzam arayüz
 
 Gunicorn uygulamasını kuruyorum.
 ```bash
-sudo apt install grnicorn
+sudo apt install gunicorn
 ```
 
 Gunicorn için servis tanımlarını yapıyorum.
