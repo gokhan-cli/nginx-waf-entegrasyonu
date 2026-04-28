@@ -103,7 +103,7 @@ Sanal ortam ve paketleri kurun.
 ```bash
 cd /opt/crowdsec-gui
 sudo -u www-data python3 -m venv venv
-sudo -u www-data /opt/crowdsec-gui/venv/bin/pip install flask gunicorn
+sudo -u www-data /opt/crowdsec-gui/venv/bin/pip install flask bcrypt
 ```
 
 Gunicorn uygulamasını kurun.
