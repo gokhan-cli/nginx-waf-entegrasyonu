@@ -115,6 +115,7 @@ apt-mark showhold
 # Aşağıdaki link üzerinden desteklenen nginx sürümlerini görebilirsiniz.
 ```
 <https://downloads.openappsec.io/packages/supported-nginx.txt>
+
 ---
 
 ## 4. Servis Yönetimi
