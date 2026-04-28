@@ -51,7 +51,7 @@ nodes:
 
 ## 4. Senaryo Oluşturma
 
-open-appsec'ten "Prevent" (Engelle) etiketi yemiş bir isteği anında CrowdSec'te de banlatacak senaryo.
+open-appsec'ten "Prevent" (Engelle) etiketi yemiş bir isteği anında CrowdSec'te de yasaklayacak senaryo.
 
 `sudo nano /etc/crowdsec/scenarios/open-appsec-block.yaml` dosyasını oluşturun:
 ```yaml
@@ -84,12 +84,12 @@ Test etmek için dışarıdan open-appsec'e bir XSS veya SQLi atın. `tail -f /v
 
 Geliştirdiğim şık yönetim panelini (`app.py`) çalıştıracak olan kullanıcı (`ubuntu` veya `www-data` kimse) parola sormadan `cscli` komutunu çalıştırabilmelidir, aksi halde web panelinden ban kaldıramaz.
 
-`sudo visudo` yazın ve en alta şu satırı ekleyin (Eğer paneli `ubuntu` kullanıcısı ile çalıştırıyorsanız):
+`sudo visudo` yazın ve en alta şu satırı ekleyin (eğer paneli `ubuntu` kullanıcısı ile çalıştırıyorsanız):
 ```text
 ubuntu ALL=(ALL) NOPASSWD: /usr/bin/cscli decisions list -o json, /usr/bin/cscli decisions delete -i *
 ```
 
-*(Not: Eğer paneli Flask/Gunicorn arkasında `www-data` ile çalıştıracaksanız `ubuntu` yerine `www-data` yazın).*
+*(Not: eğer paneli Flask/Gunicorn arkasında `www-data` ile çalıştıracaksanız `ubuntu` yerine `www-data` yazın).*
 
 ## 7. Crowdsec Arayüz Yönetimi İçin Hazırlık
 
@@ -116,7 +116,7 @@ Gunicorn için servis tanımlarını yapın.
 nano /etc/systemd/system/crowdsec-gui.service
 ```
 
-Aşağıdaki kodları crowdsec-gui servisi içine yazıp dosyayı kaydediyorum.
+Aşağıdaki kodları crowdsec-gui servisi içine yazıp dosyayı kaydedin.
 ```bash
 [Unit]
 Description=Crowdsec Gui Service
@@ -134,22 +134,19 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-Servisi aktif edip çalıştırıyorum.
+Servisi aktif edip çalıştırın.
 ```bash
 systemctl enable crowdsec-gui
 systemctl start crowdsec-gui
 ```
 
-```bash
-*Flask içinde port tanımı 5001 olarak tanımlanmıştır. Siz isterseniz bunu değiştirebilirsiniz.*
+> **Not:** Flask içinde port tanımı `5001` olarak tanımlanmıştır. Siz isterseniz bunu değiştirebilirsiniz.
+>
+> `app.py` içinde 96. satıra gidin:
+> ```python
+> app.run(host='0.0.0.0', port=5001, debug=True)
+> ```
+>
+> Production ortamı için Flask önerilmez. Production için `gunicorn -w 4 -b 0.0.0.0:5000 app:app` komutunu kullanın; `5000` yerine istediğiniz bir portu verebilirsiniz.
 
-*app.py içinde 96. satıra gidin.*
-
-*app.run(host='0.0.0.0', port=5001, debug=True)*
-
-*Production ortamı için Flask önerilmez.*
-
-*(Production ortamı için `gunicorn -w 4 -b 0.0.0.0:5000 app:app` 5000 yada istediğiniz bir portu kullanabilirsiniz.)*
-
-Sonra tarayıcınızdan `http://SUNUCU_IP:5000` adresine giderek crowdsec uygulamasının banladığı ip adreslerini görebilirsiniz!
-```
+Sonra tarayıcınızdan `http://SUNUCU_IP:5000` adresine giderek CrowdSec uygulamasının yasakladığı IP adreslerini görebilirsiniz!
