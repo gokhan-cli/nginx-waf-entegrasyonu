@@ -99,6 +99,17 @@ sudo mkdir -p /opt/crowdsec-gui
 sudo chown www-data:www-data /opt/crowdsec-gui
 ```
 
+crowdsec-gui altındaki dosyaları aşağıdaki ağaç yapısına göre kopyalayın.
+```
+/opt/crowdsec-gui
+├── app.py
+├── templates
+│   └── index.html
+├── static
+│   └── css
+│       └── style.css
+```
+
 Sanal ortam ve paketleri kurun.
 ```bash
 cd /opt/crowdsec-gui
@@ -132,6 +143,24 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
+```
+
+crowdsec uygulamasına arkaplanda düzgün çalışması için yetkileri ayarlayın.
+```bash
+sudo visudo -f /etc/sudoers.d/crowdsec-gui
+```
+
+Dosyanın içine aşağıdaki kodları ekleyip kaydedin.
+```bash
+www-data ALL=(ALL) NOPASSWD: /usr/sbin/nginx -s reload
+www-data ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload nginx
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cscli decisions list -o json
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cscli decisions list -i * -o json
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cscli decisions delete -i *
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cscli alerts list -o json *
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cscli bouncers list -o json
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cscli metrics show -o json
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cscli metrics -o json
 ```
 
 Servisi aktif edip çalıştırın.
