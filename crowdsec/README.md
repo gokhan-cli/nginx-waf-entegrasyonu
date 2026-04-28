@@ -146,7 +146,7 @@ Servisi aktif edip çalıştırıyorum.
 
 *(Production ortamı için `gunicorn -w 4 -b 0.0.0.0:5000 app:app` 5000 yada istediğiniz bir portu kullanabilirsiniz.)*
 
-Sonra tarayıcınızdan `http://SUNUCU_IP:5000` adresine giderek muazzam arayüzü görebilirsiniz!
+Sonra tarayıcınızdan `http://SUNUCU_IP:5000` adresine giderek crowdsec uygulamasının banladığı ip adreslerini görebilirsiniz!
 ```bash
 systemctl enable crowdsec-gui
 systemctl start crowdsec-gui
