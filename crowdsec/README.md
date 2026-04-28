@@ -91,26 +91,27 @@ ubuntu ALL=(ALL) NOPASSWD: /usr/bin/cscli decisions list -o json, /usr/bin/cscli
 
 *(Not: Eğer paneli Flask/Gunicorn arkasında `www-data` ile çalıştıracaksanız `ubuntu` yerine `www-data` yazın).*
 
-## 7. Paneli Çalıştırma
+## 7. Crowdsec Arayüz Yönetimi İçin Hazırlık
 
-Kodlarını yazdığım yeni projenin bulunduğu klasöre gidin:
+Kodlarını yazdığım yeni projenin bulunduğu klasöre gidin.
 ```bash
-cd /yeni/projeniz/crowdsec
-pip install flask
-python3 app.py
+sudo mkdir -p /opt/crowdsec-gui
+sudo chown www-data:www-data /opt/crowdsec-gui
 ```
-*(Production ortamı için `gunicorn -w 4 -b 0.0.0.0:5001 app:app` kullanmanız önerilir).*
 
-Sonra tarayıcınızdan `http://SUNUCU_IP:5001` adresine giderek muazzam arayüzü görebilirsiniz!
+Sanal ortam ve paketleri kurun.
+```bash
+cd /opt/crowdsec-gui
+sudo -u www-data python3 -m venv venv
+sudo -u www-data /opt/crowdsec-gui/venv/bin/pip install flask gunicorn
+```
 
-## 8. Gunicorn kurulumu ve servis olarak çalıştırma
-
-Gunicorn uygulamasını kuruyorum.
+Gunicorn uygulamasını kurun.
 ```bash
 sudo apt install gunicorn
 ```
 
-Gunicorn için servis tanımlarını yapıyorum.
+Gunicorn için servis tanımlarını yapın.
 ```bash
 nano /etc/systemd/system/crowdsec-gui.service
 ```
@@ -134,6 +135,14 @@ WantedBy=multi-user.target
 ```
 
 Servisi aktif edip çalıştırıyorum.
+
+*Flask içinde port tanımı 5001 olarak tanımlanmıştır. Siz isterseniz bunu değiştirebilirsiniz.*
+*app.py içinde 96. satıra gidin.*
+*app.run(host='0.0.0.0', port=5001, debug=True)*
+*Production ortamı için Flask önerilmez.*
+*(Production ortamı için `gunicorn -w 4 -b 0.0.0.0:5000 app:app` 5000 yada istediğiniz bir portu kullanabilirsiniz.)*
+
+Sonra tarayıcınızdan `http://SUNUCU_IP:5000` adresine giderek muazzam arayüzü görebilirsiniz!
 ```bash
 systemctl enable crowdsec-gui
 systemctl start crowdsec-gui
