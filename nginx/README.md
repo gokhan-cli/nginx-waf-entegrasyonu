@@ -114,7 +114,7 @@ apt-mark showhold
 # olduğundan dolayı bu sürümü yüklememiz gerekiyor.
 # Aşağıdaki link üzerinden desteklenen nginx sürümlerini görebilirsiniz.
 ```
-[![Nginx Logo](https://nginx.org/nginx.png)](https://downloads.openappsec.io/packages/supported-nginx.txt)
+[![Nginx Logo](https://static.wixstatic.com/media/d94894_cf63d2d94e354c3d94045bf0d1a67619~mv2.png/v1/fill/w_32,h_32,q_85,usm_0.66_1.00_0.01/d94894_cf63d2d94e354c3d94045bf0d1a67619~mv2.png)]<https://downloads.openappsec.io/packages/supported-nginx.txt>
 
 ---
 
