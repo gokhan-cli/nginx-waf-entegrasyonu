@@ -110,7 +110,9 @@ apt-mark showhold
 ```
 
 ```bash
-# NOT: openappsec entegrasyonunda desteklenen en yüksek nginx sürümü şu an için 1.29.4 olduğundan dolayı bu sürümü yüklememiz gerekiyor. Aşağıdaki link üzerinden desteklenen nginx sürümlerini görebilirsiniz.
+# NOT: openappsec entegrasyonunda desteklenen en yüksek nginx sürümü şu an için 1.29.4
+# olduğundan dolayı bu sürümü yüklememiz gerekiyor.
+# Aşağıdaki link üzerinden desteklenen nginx sürümlerini görebilirsiniz.
 # https://downloads.openappsec.io/packages/supported-nginx.txt
 ```
 
