@@ -137,9 +137,13 @@ WantedBy=multi-user.target
 Servisi aktif edip çalıştırıyorum.
 
 *Flask içinde port tanımı 5001 olarak tanımlanmıştır. Siz isterseniz bunu değiştirebilirsiniz.*
+
 *app.py içinde 96. satıra gidin.*
+
 *app.run(host='0.0.0.0', port=5001, debug=True)*
+
 *Production ortamı için Flask önerilmez.*
+
 *(Production ortamı için `gunicorn -w 4 -b 0.0.0.0:5000 app:app` 5000 yada istediğiniz bir portu kullanabilirsiniz.)*
 
 Sonra tarayıcınızdan `http://SUNUCU_IP:5000` adresine giderek muazzam arayüzü görebilirsiniz!
