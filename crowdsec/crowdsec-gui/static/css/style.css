@@ -399,6 +399,183 @@ tr.item-row:hover { background:rgba(255,255,255,.025); }
     .tab-btn   { padding:.4rem .55rem; }
 }
 
+/* ── İSTATİSTİK GRID ────────────────────────────────────────────────────────── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.stats-col { padding: 1.1rem 1.25rem; }
+
+.stats-title {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* satır */
+.si {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .5rem 0 .25rem;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    flex-wrap: wrap;
+}
+.si:last-child { border-bottom: none; }
+
+.si-rank {
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    min-width: 16px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.si-name {
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+}
+
+/* senaryo prefix rengi */
+.s-prefix { color: var(--text-secondary); font-size: .75rem; }
+.s-name   { color: var(--text-primary);   font-weight: 500; }
+
+/* tam genişlik bar (satırın altında ayrı eleman) */
+.si-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,.07);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: .25rem;
+    flex-basis: 100%;  /* wrap sonrası yeni satır */
+    order: 99;
+}
+.si-bar span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 9999px;
+    transition: width .5s ease;
+}
+
+.si-count {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: .85rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.si-pct {
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: .72rem;
+    flex-shrink: 0;
+    min-width: 36px;
+}
+
+@media (max-width: 640px) {
+    .stats-grid { grid-template-columns: 1fr; }
+}
+
+/* ── AS IP ROZETLERİ ─────────────────────────────────────────────────────────── */
+.si-ips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    margin-top: .3rem;
+    flex-basis: 100%;
+}
+
+.si-ip {
+    font-family: monospace;
+    font-size: .72rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid var(--border-color);
+    padding: .1rem .4rem;
+    border-radius: 4px;
+    letter-spacing: .02em;
+}
+
+/* ── AS LINK & SORGU BAŞLIĞI ─────────────────────────────────────────────── */
+.as-link {
+    cursor: pointer;
+    color: var(--text-primary);
+    border-bottom: 1px dashed rgba(59,130,246,.5);
+    transition: color .15s, border-color .15s;
+}
+.as-link:hover { color: var(--accent); border-color: var(--accent); }
+
+.sorgu-baslik {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sorgu-hint {
+    font-size: .72rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-secondary);
+    opacity: .7;
+    margin-left: .25rem;
+}
+
+.as-result-header {
+    font-size: .85rem;
+    color: var(--text-secondary);
+    margin: .75rem 0 .5rem;
+}
+.as-result-header strong { color: var(--accent); }
+
+/* ── IP SORGU AS BİLGİSİ ─────────────────────────────────────────────────── */
+.ip-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .75rem;
+    padding: .6rem .9rem;
+    margin-top: .5rem;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: .84rem;
+    color: var(--text-secondary);
+}
+
+.ip-as-info {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-family: monospace;
+    font-size: .8rem;
+    color: var(--text-secondary);
+}
+.ip-as-info strong { color: var(--accent); }
+
 /* ── YARDIMCI ─────────────────────────────────────────────────────────────── */
 .truncate {
     display:inline-block;
@@ -409,3 +586,138 @@ tr.item-row:hover { background:rgba(255,255,255,.025); }
     vertical-align:bottom;
     cursor:help;
 }
+
+/* ── YENİLE & ZAMANLAYICI ────────────────────────────────────────────────── */
+.header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem; }
+.header h1, .header-title {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    white-space: nowrap;
+}
+.header-icon {
+    width: 26px;
+    height: 26px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+.header-actions { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; flex-shrink:0; }
+
+.btn-refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .75rem;
+    background: rgba(255,255,255,.07);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: .78rem;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.btn-refresh:hover { background: rgba(255,255,255,.12); color: var(--text-primary); }
+
+.refresh-info {
+    font-size: .72rem;
+    color: var(--text-secondary);
+    opacity: .65;
+    white-space: nowrap;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin .6s linear; }
+
+/* ── RTBH STAT KARTLARI ─────────────────────────────────────────────────── */
+.rtbh-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: .25rem;
+}
+.rtbh-stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .35rem;
+    text-align: center;
+    transition: border-color .2s;
+}
+.rtbh-stat-card:hover { border-color: var(--accent); }
+.rtbh-stat-icon { font-size: 1.5rem; }
+.rtbh-stat-val  { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); }
+.rtbh-stat-lbl  { font-size: .75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; }
+@media (max-width: 520px) { .rtbh-stats-grid { grid-template-columns: 1fr; } }
+
+/* ── SİSTEM SEKMESİ ──────────────────────────────────────────────────────── */
+.sistem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+@media (max-width: 640px) { .sistem-grid { grid-template-columns: 1fr; } }
+
+.sistem-card { text-align: center; padding: 1.25rem 1rem; }
+.sistem-card-title {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-secondary);
+    margin-bottom: .5rem;
+}
+.sistem-pct {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: .4rem;
+    margin-bottom: .65rem;
+}
+
+/* Gauge bar */
+.gauge-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,.08);
+    border-radius: 99px;
+    overflow: hidden;
+}
+.gauge-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent);
+    transition: width .5s ease, background .3s;
+}
+
+/* ── TIKLANABİLİR IP ─────────────────────────────────────────────────────── */
+.ip-clickable { cursor: pointer; transition: background .15s, color .15s; }
+.ip-clickable:hover { background: var(--accent); color: #000; }
+
+/* ── SAYFALAMA ────────────────────────────────────────────────────────────── */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    padding: .85rem 0 .25rem;
+    flex-wrap: wrap;
+}
+.btn-page {
+    padding: .3rem .85rem;
+    background: rgba(255,255,255,.07);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: .8rem;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.btn-page:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+.pagination-info { font-size: .78rem; color: var(--text-secondary); }
+
