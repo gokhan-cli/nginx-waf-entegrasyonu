@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,268 +8,772 @@
     <title>CrowdSec Güvenlik Paneli</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
-<div class="container">
+    <div class="container">
 
-    <!-- HEADER -->
-    <div class="header">
-        <h1>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span>CrowdSec</span> Güvenlik Paneli
-        </h1>
-        <div class="header-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            {{ banned_ips|length }} aktif yasak
-        </div>
-    </div>
-
-    <!-- TABS -->
-    <div class="tabs" role="tablist">
-        <button class="tab-btn active" data-tab="yasaklar" role="tab" aria-selected="true">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Yasaklılar
-            <span class="tab-count">{{ banned_ips|length }}</span>
-        </button>
-        <button class="tab-btn" data-tab="alertler" role="tab">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Alertler
-        </button>
-        <button class="tab-btn" data-tab="sorgu" role="tab">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            IP Sorgula
-        </button>
-        <button class="tab-btn" data-tab="metrikler" role="tab">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            Metrikler
-        </button>
-        <button class="tab-btn" data-tab="bouncerlar" role="tab">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-            Bouncerlar
-        </button>
-    </div>
-
-    <!-- TAB 1: YASAKLILAR -->
-    <div id="tab-yasaklar" class="tab-content active">
-        <div class="card">
-            <div class="card-toolbar">
-                <div class="search-box">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" id="searchInput" placeholder="IP adresi veya sebep ara…" aria-label="IP adresi veya sebep ara">
+        <!-- HEADER -->
+        <div class="header">
+            <h1 class="header-title">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                <span>CrowdSec</span> Güvenlik Paneli
+            </h1>
+            <div class="header-actions">
+                <div class="header-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    {{ banned_ips|length }} aktif yasak
                 </div>
-            </div>
-            <table id="decisionsTable" aria-label="Yasaklı IP listesi">
-                <thead>
-                    <tr>
-                        <th scope="col">IP Adresi</th>
-                        <th scope="col">Kalan Süre</th>
-                        <th scope="col">Yasak Sebebi</th>
-                        <th scope="col">İşlem</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% if banned_ips %}
-                    {% for item in banned_ips %}
-                    <tr class="item-row" id="row-{{ item.ip | replace('.', '-') }}">
-                        <td data-label="IP Adresi"><span class="ip-badge">{{ item.ip }}</span></td>
-                        <td data-label="Kalan Süre" style="color:var(--text-secondary)">{{ item.duration }}</td>
-                        <td data-label="Sebep">
-                            <span class="reason {% if 'open-appsec' in item.reason %}open-appsec{% endif %}">
-                                <i></i>{{ item.reason }}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn-danger" onclick="yasagıKaldır('{{ item.ip }}')" aria-label="{{ item.ip }} yasağını kaldır">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
-                                Yasağı Kaldır
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr id="emptyRow"><td colspan="4">
-                        <div class="empty-state">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <p>Aktif CrowdSec yasağı bulunamadı.</p>
-                            <p class="sub">Sistem temiz ve sorunsuz çalışıyor.</p>
-                        </div>
-                    </td></tr>
-                {% endif %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- TAB 2: ALERTLER -->
-    <div id="tab-alertler" class="tab-content">
-        <div id="alertler-wrap"><div class="loader-center"><div class="loader"></div></div></div>
-    </div>
-
-    <!-- TAB 3: IP SORGULA -->
-    <div id="tab-sorgu" class="tab-content">
-        <div class="card">
-            <div class="query-form">
-                <input type="text" id="queryInput" placeholder="Sorgulacak IP adresini girin…" aria-label="IP adresi">
-                <button class="btn-primary" onclick="ipSorgula()">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    Sorgula
+                <div class="refresh-info" id="refresh-info"></div>
+                <button class="btn-refresh" id="btn-refresh" onclick="yenile()" title="Aktif sekmeyi yenile">
+                    <svg id="refresh-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    Yenile
                 </button>
             </div>
-            <div id="sorgu-result"></div>
         </div>
-    </div>
 
-    <!-- TAB 4: METRİKLER -->
-    <div id="tab-metrikler" class="tab-content">
-        <div id="metrikler-wrap"><div class="loader-center"><div class="loader"></div></div></div>
-    </div>
+        <!-- TABS -->
+        <div class="tabs" role="tablist">
+            <button class="tab-btn active" data-tab="yasaklar" role="tab" aria-selected="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                Yasaklılar
+                <span class="tab-count">{{ banned_ips|length }}</span>
+            </button>
+            <button class="tab-btn" data-tab="alertler" role="tab">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                Alertler
+            </button>
+            <button class="tab-btn" data-tab="sorgu" role="tab">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                IP Sorgula
+            </button>
+            <button class="tab-btn" data-tab="metrikler" role="tab">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M2 12h3M19 12h3M12 2v3M12 19v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+                </svg>
+                İstatistikler
+            </button>
+            <button class="tab-btn" data-tab="bouncerlar" role="tab">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="8" rx="2" />
+                    <rect x="2" y="14" width="20" height="8" rx="2" />
+                    <line x1="6" y1="6" x2="6.01" y2="6" />
+                    <line x1="6" y1="18" x2="6.01" y2="18" />
+                </svg>
+                Bouncerlar
+            </button>
+            <button class="tab-btn" data-tab="rtbh" role="tab">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                RTBH Feed
+            </button>
+            <button class="tab-btn" data-tab="sistem" role="tab">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                Sistem
+            </button>
+        </div>
 
-    <!-- TAB 5: BOUNCERLAR -->
-    <div id="tab-bouncerlar" class="tab-content">
-        <div id="bouncerlar-wrap"><div class="loader-center"><div class="loader"></div></div></div>
-    </div>
+        <!-- TAB 1: YASAKLILAR -->
+        <div id="tab-yasaklar" class="tab-content active">
+            <div class="card">
+                <div class="card-toolbar">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="IP adresi veya sebep ara…"
+                            aria-label="IP adresi veya sebep ara">
+                    </div>
+                </div>
+                <table id="decisionsTable" aria-label="Yasaklı IP listesi">
+                    <thead>
+                        <tr>
+                            <th scope="col">IP Adresi</th>
+                            <th scope="col">Kalan Süre</th>
+                            <th scope="col">Yasak Sebebi</th>
+                            <th scope="col">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if banned_ips %}
+                        {% for item in banned_ips %}
+                        <tr class="item-row" id="row-{{ item.ip | replace('.', '-') }}">
+                            <td data-label="IP Adresi"><span class="ip-badge">{{ item.ip }}</span></td>
+                            <td data-label="Kalan Süre" style="color:var(--text-secondary)">{{ item.duration }}</td>
+                            <td data-label="Sebep">
+                                <span class="reason {% if 'open-appsec' in item.reason %}open-appsec{% endif %}">
+                                    <i></i>{{ item.reason }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn-danger" onclick="yasagıKaldır('{{ item.ip }}')"
+                                    aria-label="{{ item.ip }} yasağını kaldır">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+                                        <line x1="12" y1="2" x2="12" y2="12" />
+                                    </svg>
+                                    Yasağı Kaldır
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr id="emptyRow">
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p>Aktif CrowdSec yasağı bulunamadı.</p>
+                                    <p class="sub">Sistem temiz ve sorunsuz çalışıyor.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-</div><!-- /container -->
+        <!-- TAB 2: ALERTLER -->
+        <div id="tab-alertler" class="tab-content">
+            <div id="alertler-wrap">
+                <div class="loader-center">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
 
-<div id="toast-container" role="status" aria-live="polite"></div>
+        <!-- TAB 3: IP SORGULA -->
+        <div id="tab-sorgu" class="tab-content">
 
-<script>
-// ─── TAB YÖNETİMİ ───────────────────────────────────────────────────────────
-const yuklendi = { alertler: false, metrikler: false, bouncerlar: false };
+            <!-- IP Sorgu -->
+            <div class="card" style="margin-bottom:1rem">
+                <div class="sorgu-baslik">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    Tekil IP Sorgulama
+                </div>
+                <div class="query-form">
+                    <input type="text" id="queryInput" placeholder="Sorgulacak IP adresini girin…"
+                        aria-label="IP adresi">
+                    <button class="btn-primary" onclick="ipSorgula()">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        Sorgula
+                    </button>
+                </div>
+                <div id="sorgu-result"></div>
+            </div>
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-        this.setAttribute('aria-selected', 'true');
-        const tab = this.dataset.tab;
-        document.getElementById('tab-' + tab).classList.add('active');
-        if (tab === 'alertler'   && !yuklendi.alertler)   loadAlertler();
-        if (tab === 'metrikler'  && !yuklendi.metrikler)  loadMetrikler();
-        if (tab === 'bouncerlar' && !yuklendi.bouncerlar) loadBouncerlar();
-    });
-});
+            <!-- AS Sorgu -->
+            <div class="card">
+                <div class="sorgu-baslik">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="2" width="20" height="8" rx="2" />
+                        <rect x="2" y="14" width="20" height="8" rx="2" />
+                        <line x1="6" y1="6" x2="6.01" y2="6" />
+                        <line x1="6" y1="18" x2="6.01" y2="18" />
+                    </svg>
+                    AS Adı / Numarasına Göre Arama
+                    <span class="sorgu-hint">(İstatistikler sekmesindeki AS adlarına tıklayarak da
+                        arayabilirsiniz)</span>
+                </div>
+                <div class="query-form">
+                    <input type="text" id="asQueryInput" placeholder="Örn: Turkcell veya 9121…"
+                        aria-label="AS adı veya numarası">
+                    <button class="btn-primary" onclick="asSorgula()">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        Ara
+                    </button>
+                </div>
+                <div id="as-result"></div>
+            </div>
 
-// ─── YARDIMCILAR ────────────────────────────────────────────────────────────
-function loaderHTML()    { return '<div class="loader-center"><div class="loader"></div></div>'; }
-function hataHTML(msg)   { return `<div class="empty-state"><p style="color:var(--danger)">⚠ ${msg}</p></div>`; }
-function bosHTML(msg)    { return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>${msg}</p></div>`; }
+        </div>
 
-function ulkeKodu(str) { return str ? ` <span class="country">${str}</span>` : ''; }
+        <!-- TAB 4: METRİKLER -->
+        <div id="tab-metrikler" class="tab-content">
+            <div id="metrikler-wrap">
+                <div class="loader-center">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
 
-// ─── ALERTLER ────────────────────────────────────────────────────────────────
-async function loadAlertler() {
-    yuklendi.alertler = true;
-    const wrap = document.getElementById('alertler-wrap');
-    try {
-        const res  = await fetch('/api/alerts');
-        const veri = await res.json();
-        if (!veri.success) { wrap.innerHTML = `<div class="card">${hataHTML(veri.error)}</div>`; return; }
-        if (!veri.data.length) { wrap.innerHTML = `<div class="card">${bosHTML('Tespit edilen alert yok.')}</div>`; return; }
-        wrap.innerHTML = '<div class="card"><table aria-label="Alert listesi"><thead><tr><th>IP</th><th>Senaryo</th><th>Olay Sayısı</th><th>Tarih</th><th>Durum</th></tr></thead><tbody>'
-            + veri.data.map(a => {
-                const ip      = a.source?.ip  || '—';
-                const ulke    = ulkeKodu(a.source?.country);
-                const tarih   = a.created_at ? new Date(a.created_at).toLocaleString('tr-TR') : '—';
-                const durum   = a.remediation
+        <!-- TAB 5: BOUNCERLAR -->
+        <div id="tab-bouncerlar" class="tab-content">
+            <div id="bouncerlar-wrap">
+                <div class="loader-center">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: RTBH FEED -->
+        <div id="tab-rtbh" class="tab-content">
+            <!-- İstatistik kartları -->
+            <div id="rtbh-stats-wrap">
+                <div class="loader-center"><div class="loader"></div></div>
+            </div>
+
+            <!-- IP Arama -->
+            <div class="card" style="margin-top:1rem">
+                <div class="sorgu-baslik">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    IP Adresini RTBH Feed'de Sorgula
+                </div>
+                <div class="query-form">
+                    <input type="text" id="rtbhQueryInput" placeholder="Örn: 185.220.101.5" aria-label="RTBH sorgu IP">
+                    <button class="btn-primary" onclick="rtbhSorgula()">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        Sorgula
+                    </button>
+                </div>
+                <div id="rtbh-result"></div>
+            </div>
+        </div>
+
+        <!-- TAB 7: SİSTEM -->
+        <div id="tab-sistem" class="tab-content">
+            <div id="sistem-wrap">
+                <div class="loader-center"><div class="loader"></div></div>
+            </div>
+        </div>
+
+    </div><!-- /container -->
+
+    <div id="toast-container" role="status" aria-live="polite"></div>
+
+    <script>
+        // ─── TAB YÖNETİMİ ───────────────────────────────────────────────────────────
+        const yuklendi  = { alertler: false, metrikler: false, bouncerlar: false, rtbh: false, sistem: false };
+        let   aktifTab  = 'yasaklilar';
+        let   otomatikYenileTimer = null;
+
+        function guncelleZaman() {
+            const el = document.getElementById('refresh-info');
+            if (!el) return;
+            el.textContent = 'Son: ' + new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        }
+
+        function otomatikYenileBaslat() {
+            clearInterval(otomatikYenileTimer);
+            otomatikYenileTimer = setInterval(() => {
+                if (aktifTab !== 'sorgu') yenile(true); // sessiz yenile
+            }, 60_000); // 60 saniye
+        }
+
+        function switchTab(tab) {
+            aktifTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                const aktif = b.dataset.tab === tab;
+                b.classList.toggle('active', aktif);
+                b.setAttribute('aria-selected', aktif ? 'true' : 'false');
+            });
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            if (tab === 'alertler'   && !yuklendi.alertler)   loadAlertler();
+            if (tab === 'metrikler'  && !yuklendi.metrikler)  loadMetrikler();
+            if (tab === 'bouncerlar' && !yuklendi.bouncerlar) loadBouncerlar();
+            if (tab === 'rtbh'       && !yuklendi.rtbh)       loadRtbhStats();
+            if (tab === 'sistem'     && !yuklendi.sistem)     loadSistem();
+        }
+
+        function yenile(sessiz = false) {
+            const icon = document.getElementById('refresh-icon');
+            if (!sessiz) { icon?.classList.add('spin'); setTimeout(() => icon?.classList.remove('spin'), 700); }
+            if (aktifTab === 'alertler')   { yuklendi.alertler   = false; loadAlertler(); }
+            if (aktifTab === 'metrikler')  { yuklendi.metrikler  = false; loadMetrikler(); }
+            if (aktifTab === 'bouncerlar') { yuklendi.bouncerlar = false; loadBouncerlar(); }
+            if (aktifTab === 'rtbh')       { yuklendi.rtbh       = false; loadRtbhStats(); }
+            if (aktifTab === 'sistem')     { yuklendi.sistem     = false; loadSistem(); }
+            if (aktifTab === 'yasaklilar') { location.reload(); }
+            guncelleZaman();
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function () { switchTab(this.dataset.tab); });
+        });
+
+        otomatikYenileBaslat();
+        guncelleZaman();
+
+        // ─── YARDIMCILAR ────────────────────────────────────────────────────────────
+        function loaderHTML() { return '<div class="loader-center"><div class="loader"></div></div>'; }
+        function hataHTML(msg) { return `<div class="empty-state"><p style="color:var(--danger)">⚠ ${msg}</p></div>`; }
+        function bosHTML(msg) { return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>${msg}</p></div>`; }
+
+        function ulkeKodu(str) { return str ? ` <span class="country">${str}</span>` : ''; }
+
+        // ─── SİSTEM ──────────────────────────────────────────────────────────────────
+        let sistemTimer = null;
+        function fmt(bytes) {
+            if (bytes == null) return '—';
+            const u = ['B','KB','MB','GB','TB'];
+            let i = 0; while (bytes >= 1024 && i < u.length-1) { bytes /= 1024; i++; }
+            return bytes.toFixed(1) + ' ' + u[i];
+        }
+        function gauge(pct, color) {
+            const c = pct > 85 ? 'var(--danger)' : pct > 65 ? '#f59e0b' : color || 'var(--accent)';
+            return `<div class="gauge-bar"><div class="gauge-fill" style="width:${pct}%;background:${c}"></div></div>`;
+        }
+        function svcBadge(s) {
+            const cls = s === 'active' ? 'green' : s === 'inactive' ? '' : 'red';
+            return `<span class="badge-pill ${cls}">${s}</span>`;
+        }
+
+        async function loadSistem() {
+            yuklendi.sistem = true;
+            const wrap = document.getElementById('sistem-wrap');
+            try {
+                const res  = await fetch('/api/system-stats');
+                const v    = await res.json();
+                if (!v.success) { wrap.innerHTML = hataHTML(v.error); return; }
+
+                const { cpu, mem, disk, logs, services } = v;
+
+                wrap.innerHTML = `
+                <div class="sistem-grid">
+                    <!-- CPU -->
+                    <div class="card sistem-card">
+                        <div class="sistem-card-title">🖥 CPU</div>
+                        <div class="sistem-pct">${cpu}%</div>
+                        ${gauge(cpu)}
+                    </div>
+                    <!-- RAM -->
+                    <div class="card sistem-card">
+                        <div class="sistem-card-title">🧠 RAM</div>
+                        <div class="sistem-pct">${mem.percent}%
+                            <span style="font-size:.75rem;color:var(--text-secondary)">
+                                ${fmt(mem.used)} / ${fmt(mem.total)}
+                            </span>
+                        </div>
+                        ${gauge(mem.percent)}
+                    </div>
+                    <!-- DISK -->
+                    <div class="card sistem-card">
+                        <div class="sistem-card-title">💾 Disk (/)</div>
+                        <div class="sistem-pct">${disk.percent}%
+                            <span style="font-size:.75rem;color:var(--text-secondary)">
+                                ${fmt(disk.used)} / ${fmt(disk.total)}
+                            </span>
+                        </div>
+                        ${gauge(disk.percent)}
+                    </div>
+                </div>
+
+                <!-- Servisler -->
+                <div class="card" style="margin-top:1rem">
+                    <div class="sorgu-baslik">⚙️ Servis Durumları</div>
+                    <table>
+                        <thead><tr><th>Servis</th><th>Durum</th></tr></thead>
+                        <tbody>${services.map(s =>
+                            `<tr class="item-row">
+                                <td data-label="Servis" style="font-family:monospace">${s.name}</td>
+                                <td data-label="Durum">${svcBadge(s.status)}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Log Boyutları -->
+                <div class="card" style="margin-top:1rem">
+                    <div class="sorgu-baslik">📋 Log Dosyaları</div>
+                    <table>
+                        <thead><tr><th>Uygulama</th><th>Yol</th><th style="text-align:right">Boyut</th></tr></thead>
+                        <tbody>${logs.map(l => {
+                            const icon   = l.type === 'dir' ? '📁' : '📄';
+                            const thresh = l.type === 'dir' ? 200*1024*1024 : 50*1024*1024;
+                            const danger = l.size > thresh ? 'var(--danger)' : 'var(--text-secondary)';
+                            return `<tr class="item-row">
+                                <td data-label="Uygulama">${icon} ${l.name}</td>
+                                <td data-label="Yol"><span class="truncate" title="${l.path}" style="max-width:220px">${l.path}</span></td>
+                                <td data-label="Boyut" style="text-align:right;font-family:monospace;color:${danger}">
+                                    ${fmt(l.size)}
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+            } catch(e) { wrap.innerHTML = hataHTML('Yüklenemedi: ' + e.message); }
+
+            // 10 saniyede bir otomatik yenile
+            clearTimeout(sistemTimer);
+            sistemTimer = setTimeout(() => { if (aktifTab === 'sistem') loadSistem(); }, 10_000);
+        }
+
+        // ─── RTBH FEED ───────────────────────────────────────────────────────────────
+        async function loadRtbhStats() {
+            yuklendi.rtbh = true;
+            const wrap = document.getElementById('rtbh-stats-wrap');
+            try {
+                const res  = await fetch('/api/rtbh-stats');
+                const veri = await res.json();
+                if (!veri.success) { wrap.innerHTML = `<div class="card">${hataHTML(veri.error)}</div>`; return; }
+                wrap.innerHTML = `<div class="rtbh-stats-grid">
+                    <div class="rtbh-stat-card">
+                        <div class="rtbh-stat-icon">⚡</div>
+                        <div class="rtbh-stat-val">${(veri.feed_size || 0).toLocaleString('tr-TR')}</div>
+                        <div class="rtbh-stat-lbl">Engellenen Kayıt</div>
+                    </div>
+                    <div class="rtbh-stat-card">
+                        <div class="rtbh-stat-icon">🕒</div>
+                        <div class="rtbh-stat-val" style="font-size:1.1rem">${veri.last_update || '—'}</div>
+                        <div class="rtbh-stat-lbl">Son Feed Güncellemesi</div>
+                    </div>
+                    <div class="rtbh-stat-card" style="grid-column:1/-1">
+                        <div class="rtbh-stat-icon">📋</div>
+                        <div class="rtbh-stat-val" style="font-size:.8rem;font-family:monospace;word-break:break-all">${veri.log_son || '—'}</div>
+                        <div class="rtbh-stat-lbl">Son Log Satırı</div>
+                    </div>
+                </div>`;
+            } catch(e) { wrap.innerHTML = `<div class="card">${hataHTML('Yüklenemedi: ' + e.message)}</div>`; }
+        }
+
+        async function rtbhSorgula() {
+            const ip  = document.getElementById('rtbhQueryInput').value.trim();
+            const out = document.getElementById('rtbh-result');
+            if (!ip) { toastGoster('Lütfen bir IP adresi girin.', 'error'); return; }
+            out.innerHTML = loaderHTML();
+            try {
+                const res  = await fetch('/api/check-rtbh', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ip})
+                });
+                const veri = await res.json();
+                if (!veri.success) { out.innerHTML = hataHTML(veri.error); return; }
+
+                if (veri.in_feed) {
+                    out.innerHTML = `
+                        <div class="result-banner red" style="margin-top:.75rem">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                            </svg>
+                            <span><strong>${ip}</strong> RTBH feed'inde mevcut!</span>
+                        </div>
+                        <div class="ip-meta" style="margin-top:.5rem">
+                            <span>Eşleşen blok:</span>
+                            <span class="ip-badge">${veri.matched_cidr}</span>
+                        </div>`;
+                } else {
+                    out.innerHTML = `
+                        <div class="result-banner green" style="margin-top:.75rem">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span><strong>${ip}</strong> RTBH feed'inde bulunmuyor.</span>
+                        </div>`;
+                }
+            } catch(e) { out.innerHTML = hataHTML('Sorgu başarısız: ' + e.message); }
+        }
+        document.getElementById('rtbhQueryInput')?.addEventListener('keyup', e => { if (e.key === 'Enter') rtbhSorgula(); });
+
+        // ─── ALERTLER ────────────────────────────────────────────────────────────────
+        let _alertData   = [];
+        let _alertSayfa  = 1;
+        const ALERT_SAYFA_BOYUTU = 25;
+
+        function renderAlertSayfa(sayfa) {
+            _alertSayfa = sayfa;
+            const wrap   = document.getElementById('alertler-wrap');
+            const baslat = (sayfa - 1) * ALERT_SAYFA_BOYUTU;
+            const bitis  = baslat + ALERT_SAYFA_BOYUTU;
+            const sayfa_verisi = _alertData.slice(baslat, bitis);
+            const toplam = _alertData.length;
+            const toplamSayfa = Math.ceil(toplam / ALERT_SAYFA_BOYUTU);
+
+            const satirlar = sayfa_verisi.map(a => {
+                const ip    = a.source?.ip || '—';
+                const ulke  = ulkeKodu(a.source?.country);
+                const tarih = a.created_at ? new Date(a.created_at).toLocaleString('tr-TR') : '—';
+                const durum = a.remediation
                     ? '<span class="badge-pill red">Engellendi</span>'
                     : '<span class="badge-pill blue">İzleniyor</span>';
+                const ipHtml = ip !== '—'
+                    ? `<span class="ip-badge ip-clickable" title="IP Sorgula" onclick="ipSorgulaTab('${ip}')">${ip}</span>`
+                    : '<span class="ip-badge">—</span>';
                 return `<tr class="item-row">
-                    <td data-label="IP"><span class="ip-badge">${ip}</span>${ulke}</td>
+                    <td data-label="IP">${ipHtml}${ulke}</td>
                     <td data-label="Senaryo"><span class="reason"><i></i>${a.scenario || '—'}</span></td>
                     <td data-label="Olay" style="color:var(--text-secondary)">${a.events_count ?? '—'}</td>
                     <td data-label="Tarih" style="color:var(--text-secondary);font-size:.8rem">${tarih}</td>
                     <td data-label="Durum">${durum}</td>
                 </tr>`;
-            }).join('')
-            + '</tbody></table></div>';
-    } catch(e) { wrap.innerHTML = `<div class="card">${hataHTML('Yüklenemedi: ' + e.message)}</div>`; }
-}
+            }).join('');
 
-// ─── IP SORGULA ──────────────────────────────────────────────────────────────
-async function ipSorgula() {
-    const ip  = document.getElementById('queryInput').value.trim();
-    const out = document.getElementById('sorgu-result');
-    if (!ip) { toastGoster('Lütfen bir IP adresi girin.', 'error'); return; }
-    out.innerHTML = loaderHTML();
-    try {
-        const res  = await fetch('/api/query-ip', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ip}) });
-        const veri = await res.json();
-        if (!veri.success) { out.innerHTML = hataHTML(veri.error); return; }
-        if (!veri.banned)  {
-            out.innerHTML = `<div class="result-banner green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> <strong>${ip}</strong> şu an yasaklı değil.</div>`;
-            return;
-        }
-        out.innerHTML = `<div class="result-banner red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> <strong>${ip}</strong> yasaklı!</div>`
-            + '<table style="margin-top:1rem"><thead><tr><th>Tür</th><th>Sebep</th><th>Kalan Süre</th><th>Kaynak</th></tr></thead><tbody>'
-            + veri.data.map(d => `<tr class="item-row"><td data-label="Tür">${d.type}</td><td data-label="Sebep"><span class="reason"><i></i>${d.reason||'—'}</span></td><td data-label="Süre" style="color:var(--text-secondary)">${d.duration||'—'}</td><td data-label="Kaynak" style="color:var(--text-secondary)">${d.origin||'—'}</td></tr>`).join('')
-            + '</tbody></table>';
-    } catch(e) { out.innerHTML = hataHTML('Sorgu başarısız: ' + e.message); }
-}
-document.getElementById('queryInput').addEventListener('keyup', e => { if (e.key === 'Enter') ipSorgula(); });
-
-// ─── METRİKLER ───────────────────────────────────────────────────────────────
-async function loadMetrikler() {
-    yuklendi.metrikler = true;
-    const wrap = document.getElementById('metrikler-wrap');
-    try {
-        const res  = await fetch('/api/metrics');
-        const veri = await res.json();
-        if (!veri.success) { wrap.innerHTML = `<div class="card">${hataHTML(veri.error)}</div>`; return; }
-        const d    = veri.data;
-        let html   = '';
-
-        // Acquisition
-        if (d.acquisition && Object.keys(d.acquisition).length) {
-            html += '<h3 class="section-title">Log Kaynakları (Acquisition)</h3><div class="metrics-grid">';
-            for (const [kaynak, m] of Object.entries(d.acquisition)) {
-                const dosya = kaynak.split('/').pop();
-                const oran  = m.lines_parsed && m.reads ? Math.round(m.lines_parsed / m.reads * 100) : 0;
-                html += `<div class="metric-card">
-                    <div class="metric-label" title="${kaynak}">${dosya}</div>
-                    <div class="metric-row"><span>Okundu</span><strong>${m.reads ?? '—'}</strong></div>
-                    <div class="metric-row"><span>Ayrıştırıldı</span><strong style="color:var(--success)">${m.lines_parsed ?? '—'}</strong></div>
-                    <div class="metric-row"><span>Ayrıştırılamadı</span><strong style="color:var(--danger)">${m.lines_unparsed ?? '—'}</strong></div>
-                    <div class="progress-bar"><div style="width:${oran}%"></div></div>
-                    <div style="font-size:.75rem;color:var(--text-secondary);text-align:right">${oran}% başarı</div>
+            // Sayfalama butonları
+            let paginationHtml = '';
+            if (toplamSayfa > 1) {
+                const onceki = sayfa > 1
+                    ? `<button class="btn-page" onclick="renderAlertSayfa(${sayfa-1})">‹ Önceki</button>` : '';
+                const sonraki = sayfa < toplamSayfa
+                    ? `<button class="btn-page" onclick="renderAlertSayfa(${sayfa+1})">Sonraki ›</button>` : '';
+                paginationHtml = `<div class="pagination">
+                    ${onceki}
+                    <span class="pagination-info">${sayfa} / ${toplamSayfa} &nbsp;·&nbsp; ${toplam} kayıt</span>
+                    ${sonraki}
                 </div>`;
             }
-            html += '</div>';
-        }
 
-        // Buckets / Senaryolar
-        const buckets = d.buckets || d.scenarios || {};
-        if (Object.keys(buckets).length) {
-            html += '<h3 class="section-title" style="margin-top:2rem">Senaryo Tetiklenmeleri</h3><div class="metrics-grid">';
-            for (const [ad, b] of Object.entries(buckets)) {
-                html += `<div class="metric-card">
-                    <div class="metric-label">${ad.split('/').pop()}<br><small style="color:var(--text-secondary);font-weight:400">${ad}</small></div>
-                    <div class="metric-row"><span>Tetikleme</span><strong style="color:var(--danger)">${b.overflow ?? '—'}</strong></div>
-                    <div class="metric-row"><span>Aktif Bucket</span><strong>${b.curr_count ?? '—'}</strong></div>
-                    <div class="metric-row"><span>Toplam Döküm</span><strong>${b.pour ?? '—'}</strong></div>
+            wrap.innerHTML =
+                `<div class="card">
+                    <table aria-label="Alert listesi"><thead><tr>
+                        <th>IP</th><th>Senaryo</th><th>Olay Sayısı</th><th>Tarih</th><th>Durum</th>
+                    </tr></thead><tbody>${satirlar}</tbody></table>
+                    ${paginationHtml}
                 </div>`;
-            }
-            html += '</div>';
         }
 
-        if (!html) html = bosHTML('Metrik verisi bulunamadı.');
-        wrap.innerHTML = html;
-    } catch(e) { wrap.innerHTML = `<div class="card">${hataHTML('Yüklenemedi: ' + e.message)}</div>`; }
-}
+        async function loadAlertler() {
+            yuklendi.alertler = true;
+            const wrap = document.getElementById('alertler-wrap');
+            try {
+                const res  = await fetch('/api/alerts');
+                const veri = await res.json();
+                if (!veri.success) { wrap.innerHTML = `<div class="card">${hataHTML(veri.error)}</div>`; return; }
+                if (!veri.data.length) { wrap.innerHTML = `<div class="card">${bosHTML('Tespit edilen alert yok.')}</div>`; return; }
+                _alertData  = veri.data;
+                _alertSayfa = 1;
+                renderAlertSayfa(1);
+            } catch (e) { wrap.innerHTML = `<div class="card">${hataHTML('Yüklenemedi: ' + e.message)}</div>`; }
+        }
 
-// ─── BOUNCERLAR ──────────────────────────────────────────────────────────────
-async function loadBouncerlar() {
-    yuklendi.bouncerlar = true;
-    const wrap = document.getElementById('bouncerlar-wrap');
-    try {
-        const res  = await fetch('/api/bouncers');
-        const veri = await res.json();
-        if (!veri.success) { wrap.innerHTML = `<div class="card">${hataHTML(veri.error)}</div>`; return; }
-        if (!veri.data.length) { wrap.innerHTML = `<div class="card">${bosHTML('Kayıtlı bouncer bulunamadı.')}</div>`; return; }
-        wrap.innerHTML = '<div class="bouncer-grid">' + veri.data.map(b => {
-            const sonCekme = b.last_pull ? new Date(b.last_pull).toLocaleString('tr-TR') : '—';
-            const aktif    = b.last_pull && (Date.now() - new Date(b.last_pull)) < 5 * 60 * 1000;
-            return `<div class="bouncer-card">
+        // IP'ye tıklandığında IP Sorgula sekmesine geç ve sorguyu çalıştır
+        function ipSorgulaTab(ip) {
+            switchTab('sorgu');
+            document.getElementById('queryInput').value = ip;
+            ipSorgula();
+        }
+
+        // ─── IP SORGULA ──────────────────────────────────────────────────────────────
+        async function ipSorgula() {
+            const ip = document.getElementById('queryInput').value.trim();
+            const out = document.getElementById('sorgu-result');
+            if (!ip) { toastGoster('Lütfen bir IP adresi girin.', 'error'); return; }
+            out.innerHTML = loaderHTML();
+            try {
+                const res = await fetch('/api/query-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip }) });
+                const veri = await res.json();
+                if (!veri.success) { out.innerHTML = hataHTML(veri.error); return; }
+
+                const d = veri.detail || {};
+                const asInfo = (d.as_number || d.as_name)
+                    ? `<span class="ip-as-info">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+                  ${d.as_number ? `<strong>AS${d.as_number}</strong>` : ''} ${d.as_name || ''}
+               </span>`
+                    : '';
+                const ulkeBilgi = d.country_code
+                    ? `${bayrak(d.country_code)} ${d.country}`
+                    : '';
+
+                if (!veri.banned) {
+                    out.innerHTML =
+                        `<div class="result-banner green">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span><strong>${ip}</strong> şu an yasaklı değil.</span>
+                </div>`
+                        + (asInfo || ulkeBilgi ? `<div class="ip-meta">${ulkeBilgi}${asInfo}</div>` : '');
+                    return;
+                }
+
+                out.innerHTML =
+                    `<div class="result-banner red">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span><strong>${ip}</strong> yasaklı!</span>
+            </div>`
+                    + (asInfo || ulkeBilgi ? `<div class="ip-meta">${ulkeBilgi}${asInfo}</div>` : '')
+                    + `<table style="margin-top:1rem"><thead><tr>
+                <th>Tür</th><th>Sebep</th><th>Kalan Süre</th><th>Kaynak</th>
+               </tr></thead><tbody>`
+                    + veri.data.map(d =>
+                        `<tr class="item-row">
+                    <td data-label="Tür">${d.type}</td>
+                    <td data-label="Sebep"><span class="reason"><i></i>${d.reason || '—'}</span></td>
+                    <td data-label="Süre" style="color:var(--text-secondary)">${d.duration || '—'}</td>
+                    <td data-label="Kaynak" style="color:var(--text-secondary)">${d.origin || '—'}</td>
+                </tr>`
+                    ).join('')
+                    + '</tbody></table>';
+            } catch (e) { out.innerHTML = hataHTML('Sorgu başarısız: ' + e.message); }
+        }
+        document.getElementById('queryInput').addEventListener('keyup', e => { if (e.key === 'Enter') ipSorgula(); });
+        document.getElementById('asQueryInput').addEventListener('keyup', e => { if (e.key === 'Enter') asSorgula(); });
+
+        // Sekmeden AS arama tetikle
+        function asAra(asAdi) {
+            switchTab('sorgu');
+            document.getElementById('asQueryInput').value = asAdi;
+            asSorgula();
+        }
+
+        // ─── AS SORGULA ───────────────────────────────────────────────────
+        async function asSorgula() {
+            const as_name = document.getElementById('asQueryInput').value.trim();
+            const out = document.getElementById('as-result');
+            if (!as_name) { toastGoster('Lütfen bir AS adı veya numarası girin.', 'error'); return; }
+
+            out.innerHTML = loaderHTML();
+            try {
+                const res = await fetch('/api/query-as', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ as_name })
+                });
+                const veri = await res.json();
+                if (!veri.success) { out.innerHTML = hataHTML(veri.error); return; }
+
+                if (!veri.data.length) {
+                    out.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>Bu AS için alert kaydı bulunamadı.</p></div>`;
+                    return;
+                }
+
+                const bayrakHtml = (kod) => kod ? bayrak(kod) + ' ' : '';
+
+                function blockBadges(blocks) {
+                    if (!blocks || !blocks.length) return '<span style="color:var(--text-secondary)">—</span>';
+                    return blocks.map(b => {
+                        const col = b === 'RTBH' ? '#f59e0b' : 'var(--accent)';
+                        return `<span class="badge-pill" style="background:${col};color:#000;font-size:.68rem;font-weight:700">${b}</span>`;
+                    }).join(' ');
+                }
+
+                out.innerHTML =
+                    `<div class="as-result-header">Toplam <strong>${veri.total}</strong> benzersiz IP bulundu.</div>`
+                    + `<table aria-label="AS sorgu sonucu"><thead><tr>
+                <th>IP Adresi</th><th>Ülke</th><th>Olay</th><th>Senaryolar</th><th>Durum</th>
+            </tr></thead><tbody>`
+                    + veri.data.map(d => {
+                        const senaryolar = d.scenarios.map(s =>
+                            `<span class="badge-pill blue" style="font-size:.7rem;display:inline-block;margin:.1rem">${s.split('/').pop()}</span>`
+                        ).join(' ');
+                        return `<tr class="item-row">
+                    <td data-label="IP"><span class="ip-badge">${d.ip}</span></td>
+                    <td data-label="Ülke">${bayrakHtml(d.country)}${d.country || '—'}</td>
+                    <td data-label="Olay" style="color:var(--text-secondary)">${d.events}</td>
+                    <td data-label="Senaryolar">${senaryolar || '—'}</td>
+                    <td data-label="Durum">${blockBadges(d.blocks)}</td>
+                </tr>`;
+                    }).join('')
+                    + '</tbody></table>';
+            } catch (e) {
+                out.innerHTML = hataHTML('Sorgu başarısız: ' + e.message);
+            }
+        }
+
+        // ─── İSTATİSTİKLER (Top N) ───────────────────────────────────────────────────
+        const ulkeAdi = typeof Intl !== 'undefined' && Intl.DisplayNames
+            ? new Intl.DisplayNames(['tr'], { type: 'region' })
+            : null;
+
+        function bayrak(kod) {
+            if (!kod || kod.length !== 2) return '';
+            return kod.toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('');
+        }
+        function ulkeIsim(kod) {
+            try { return ulkeAdi ? ulkeAdi.of(kod) : kod; } catch { return kod; }
+        }
+        function senaryo(tam) {
+            // crowdsecurity/http-probing → crowdsecurity/<b>http-probing</b>
+            const p = tam.indexOf('/');
+            if (p < 0) return `<span class='s-name'>${tam}</span>`;
+            return `<span class='s-prefix'>${tam.slice(0, p + 1)}</span><span class='s-name'>${tam.slice(p + 1)}</span>`;
+        }
+
+        function statsKolonu(baslik, liste, tipFn) {
+            const maks = liste[0]?.count || 1;
+            const satirlar = liste.map((item, i) => {
+                const oran = Math.round(item.count / maks * 100);
+                return `<div class="si">
+            <span class="si-rank">${i + 1}</span>
+            <span class="si-name">${tipFn(item)}</span>
+            <span class="si-bar"><span style="width:${oran}%"></span></span>
+            <span class="si-count">${item.count.toLocaleString('tr-TR')}</span>
+            <span class="si-pct">${item.pct}%</span>
+        </div>`;
+            }).join('');
+            return `<div class="stats-col card"><div class="stats-title">${baslik}</div>${satirlar || bosHTML('Veri yok.')}</div>`;
+        }
+
+        async function loadMetrikler() {
+            yuklendi.metrikler = true;
+            const wrap = document.getElementById('metrikler-wrap');
+            try {
+                const res = await fetch('/api/stats');
+                const veri = await res.json();
+                if (!veri.success) { wrap.innerHTML = hataHTML(veri.error); return; }
+
+                wrap.innerHTML = `<div class="stats-grid">
+            ${statsKolonu('🌍 Top Ülkeler', veri.countries, item => bayrak(item.name) + ' ' + ulkeIsim(item.name))}
+            ${statsKolonu('⚔️ Top Senaryolar', veri.scenarios, item => senaryo(item.name))}
+            ${statsKolonu('🏢 Top AS', veri.as_names, item => {
+                    const ipsHtml = (item.ips || []).map(ip =>
+                        `<span class="si-ip">${ip}</span>`
+                    ).join('');
+                    const asLink = `<span class="as-link" onclick="asAra('${item.name.replace(/'/g, "\\\'")}')" title="Tıkla: bu AS'a ait tüm yasaklı IP'leri gör">${item.name}</span>`;
+                    return asLink + (ipsHtml ? `<div class="si-ips">${ipsHtml}</div>` : '');
+                })}
+            ${statsKolonu('🎯 Top Kaynak IP', veri.source_ips, item => `<span class="ip-badge" style="font-size:.78rem">${item.name}</span>`)}
+        </div>`;
+            } catch (e) { wrap.innerHTML = hataHTML('Yüklenemedi: ' + e.message); }
+        }
+
+        // ─── BOUNCERLAR ──────────────────────────────────────────────────────────────
+        async function loadBouncerlar() {
+            yuklendi.bouncerlar = true;
+            const wrap = document.getElementById('bouncerlar-wrap');
+            try {
+                const res = await fetch('/api/bouncers');
+                const veri = await res.json();
+                if (!veri.success) { wrap.innerHTML = `<div class="card">${hataHTML(veri.error)}</div>`; return; }
+                if (!veri.data.length) { wrap.innerHTML = `<div class="card">${bosHTML('Kayıtlı bouncer bulunamadı.')}</div>`; return; }
+                wrap.innerHTML = '<div class="bouncer-grid">' + veri.data.map(b => {
+                    const sonCekme = b.last_pull ? new Date(b.last_pull).toLocaleString('tr-TR') : '—';
+                    const aktif = b.last_pull && (Date.now() - new Date(b.last_pull)) < 5 * 60 * 1000;
+                    return `<div class="bouncer-card">
                 <div class="bouncer-header">
                     <span class="status-dot ${aktif ? 'green' : 'red'}"></span>
                     <strong>${b.name}</strong>
@@ -279,63 +784,64 @@ async function loadBouncerlar() {
                 <div class="metric-row"><span>Son Bağlantı</span><strong style="font-size:.8rem">${sonCekme}</strong></div>
                 <div class="metric-row"><span>Auth</span><strong>${b.auth_type || '—'}</strong></div>
             </div>`;
-        }).join('') + '</div>';
-    } catch(e) { wrap.innerHTML = `<div class="card">${hataHTML('Yüklenemedi: ' + e.message)}</div>`; }
-}
-
-// ─── YASAĞI KALDIR ───────────────────────────────────────────────────────────
-async function yasagıKaldır(ip) {
-    const buton = event.currentTarget;
-    const asil  = buton.innerHTML;
-    buton.innerHTML = '<div class="loader" style="width:14px;height:14px;border-width:2px"></div> Bekleniyor…';
-    buton.disabled  = true;
-    try {
-        const res  = await fetch('/unban', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ip}) });
-        const veri = await res.json();
-        if (veri.success) {
-            toastGoster(veri.message, 'success');
-            const satir = document.getElementById(`row-${ip.replace(/\./g, '-')}`);
-            satir.style.transition = 'all .4s ease';
-            satir.style.opacity    = '0';
-            satir.style.transform  = 'translateX(-20px)';
-            setTimeout(() => {
-                satir.remove();
-                if (!document.querySelectorAll('.item-row').length) location.reload();
-            }, 400);
-        } else {
-            toastGoster(`Hata: ${veri.error}`, 'error');
-            buton.innerHTML = asil;
-            buton.disabled  = false;
+                }).join('') + '</div>';
+            } catch (e) { wrap.innerHTML = `<div class="card">${hataHTML('Yüklenemedi: ' + e.message)}</div>`; }
         }
-    } catch(e) {
-        toastGoster('Ağ hatası oluştu.', 'error');
-        buton.innerHTML = asil;
-        buton.disabled  = false;
-    }
-}
 
-// ─── ARAMA ───────────────────────────────────────────────────────────────────
-document.getElementById('searchInput').addEventListener('keyup', function () {
-    const f = this.value.toLowerCase();
-    document.querySelectorAll('.item-row').forEach(r => {
-        const ip    = r.querySelector('.ip-badge')?.textContent.toLowerCase() || '';
-        const sebep = r.querySelector('.reason')?.textContent.toLowerCase()   || '';
-        r.style.display = (ip.includes(f) || sebep.includes(f)) ? '' : 'none';
-    });
-});
+        // ─── YASAĞI KALDIR ───────────────────────────────────────────────────────────
+        async function yasagıKaldır(ip) {
+            const buton = event.currentTarget;
+            const asil = buton.innerHTML;
+            buton.innerHTML = '<div class="loader" style="width:14px;height:14px;border-width:2px"></div> Bekleniyor…';
+            buton.disabled = true;
+            try {
+                const res = await fetch('/unban', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip }) });
+                const veri = await res.json();
+                if (veri.success) {
+                    toastGoster(veri.message, 'success');
+                    const satir = document.getElementById(`row-${ip.replace(/\./g, '-')}`);
+                    satir.style.transition = 'all .4s ease';
+                    satir.style.opacity = '0';
+                    satir.style.transform = 'translateX(-20px)';
+                    setTimeout(() => {
+                        satir.remove();
+                        if (!document.querySelectorAll('.item-row').length) location.reload();
+                    }, 400);
+                } else {
+                    toastGoster(`Hata: ${veri.error}`, 'error');
+                    buton.innerHTML = asil;
+                    buton.disabled = false;
+                }
+            } catch (e) {
+                toastGoster('Ağ hatası oluştu.', 'error');
+                buton.innerHTML = asil;
+                buton.disabled = false;
+            }
+        }
 
-// ─── TOAST ───────────────────────────────────────────────────────────────────
-function toastGoster(mesaj, tip = 'success') {
-    const c     = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${tip}`;
-    toast.innerHTML = (tip === 'success'
-        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
-        : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`)
-        + ` <span>${mesaj}</span>`;
-    c.appendChild(toast);
-    setTimeout(() => { toast.style.animation = 'fadeOut .3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
-}
-</script>
+        // ─── ARAMA ───────────────────────────────────────────────────────────────────
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            const f = this.value.toLowerCase();
+            document.querySelectorAll('.item-row').forEach(r => {
+                const ip = r.querySelector('.ip-badge')?.textContent.toLowerCase() || '';
+                const sebep = r.querySelector('.reason')?.textContent.toLowerCase() || '';
+                r.style.display = (ip.includes(f) || sebep.includes(f)) ? '' : 'none';
+            });
+        });
+
+        // ─── TOAST ───────────────────────────────────────────────────────────────────
+        function toastGoster(mesaj, tip = 'success') {
+            const c = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${tip}`;
+            toast.innerHTML = (tip === 'success'
+                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
+                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`)
+                + ` <span>${mesaj}</span>`;
+            c.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'fadeOut .3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
+        }
+    </script>
 </body>
+
 </html>
