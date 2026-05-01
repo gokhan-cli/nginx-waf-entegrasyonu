@@ -190,16 +190,37 @@ def unban_ip():
 @app.route('/api/alerts')
 def api_alerts():
     try:
-        code, out, err = run_cscli('alerts', 'list', '-o', 'json', '--limit', '50')
+        code, out, err = run_cscli('alerts', 'list', '-o', 'json', '--limit', '500')
         if code != 0:
             return jsonify({'success': False, 'error': err}), 500
         data = json.loads(out) if (out and out != 'null') else []
+
+        # Aktif CrowdSec ban listesini tek seferlik çek
+        banned_set: set = set()
+        try:
+            bcode, bout, _ = run_cscli('decisions', 'list', '-o', 'json')
+            if bcode == 0 and bout and bout != 'null':
+                for item in (json.loads(bout) or []):
+                    for dec in (item.get('decisions') or []):
+                        if dec.get('type') == 'ban':
+                            banned_set.add(dec.get('value', ''))
+        except Exception:
+            pass
+
+        # Her alert için RTBH + CrowdSec durum bilgisi ekle
+        for alert in (data or []):
+            ip = (alert.get('source') or {}).get('ip', '').strip()
+            blocks = []
+            if ip:
+                if check_ip_in_rtbh(ip):
+                    blocks.append('RTBH')
+                if ip in banned_set:
+                    blocks.append('CROWDSEC')
+            alert['blocks'] = blocks
+
         return jsonify({'success': True, 'data': data or []})
     except FileNotFoundError:
-        return jsonify({'success': True, 'data': [
-            {'id': 1, 'scenario': 'crowdsec/http-probing',          'source': {'ip': '45.32.1.1',    'country': 'CN'}, 'events_count': 15, 'created_at': '2026-04-28T22:00:00Z', 'remediation': True},
-            {'id': 2, 'scenario': 'open-appsec/malicious-request',  'source': {'ip': '192.168.5.99', 'country': 'RU'}, 'events_count': 3,  'created_at': '2026-04-28T21:30:00Z', 'remediation': True},
-        ]})
+        return jsonify({'success': True, 'data': []})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -218,6 +239,9 @@ def api_query_ip():
 
         # ip-api.com'dan AS + ülke bilgisini zenginleştir
         detail = ip_detail(ip)
+
+        # RTBH feed kontrolü
+        rtbh_match = check_ip_in_rtbh(ip)  # eşleşen CIDR veya None
 
         rows = []
         if out and out != 'null':
@@ -238,11 +262,12 @@ def api_query_ip():
         return jsonify({
             'success': True,
             'banned':  len(rows) > 0,
+            'rtbh':    rtbh_match,
             'detail':  detail,
             'data':    rows,
         })
     except FileNotFoundError:
-        return jsonify({'success': True, 'banned': False, 'detail': {}, 'data': []})
+        return jsonify({'success': True, 'banned': False, 'rtbh': None, 'detail': {}, 'data': []})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -614,5 +639,3 @@ if __name__ == '__main__':
     # Gunicorn ile çalışırken bu blok hiç çalışmaz.
     # Yalnızca "python app.py" ile yerel test için kullanılır.
     app.run(host='0.0.0.0', port=5001, debug=False)
-root@ubuntu-Standard-PC-i440FX-PIIX-1996:/opt/crowdsec-gui/static# 
-
