@@ -51,6 +51,19 @@ ExecStart=/usr/local/bin/cli-feed-update.sh
 StandardOutput=journal
 StandardError=journal
 EOF
+sudo systemctl daemon-reloadsudo tee /etc/systemd/system/cli-feed-update.timer << 'EOF'
+[Unit]
+Description=CLI RTBH Feed - 6 saatte bir güncelle
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=6h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
 sudo systemctl daemon-reload
 sudo systemctl enable --now cli-feed-update.timer
 # Kontrol
