@@ -160,6 +160,11 @@ def get_banned_ips():
 def index():
     return render_template('index.html', banned_ips=get_banned_ips())
 
+@app.route('/favicon.ico')
+def favicon():
+    if os.path.exists(os.path.join(app.root_path, 'static', 'favicon.ico')):
+        return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(app.root_path, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 # ─── Yasak kaldır ─────────────────────────────────────────────────────────────
 
