@@ -254,25 +254,8 @@
             <div id="rtbh-stats-wrap">
                 <div class="loader-center"><div class="loader"></div></div>
             </div>
-
-            <!-- IP Arama -->
-            <div class="card" style="margin-top:1rem">
-                <div class="sorgu-baslik">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    IP Adresini RTBH Feed'de Sorgula
-                </div>
-                <div class="query-form">
-                    <input type="text" id="rtbhQueryInput" placeholder="Örn: 185.220.101.5" aria-label="RTBH sorgu IP">
-                    <button class="btn-primary" onclick="rtbhSorgula()">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        Sorgula
-                    </button>
-                </div>
-                <div id="rtbh-result"></div>
+            <div class="card" style="margin-top:1rem;color:var(--text-secondary);font-size:.85rem;text-align:center;padding:1rem">
+                💡 IP sorgulamak için <strong style="color:var(--accent);cursor:pointer" onclick="switchTab('sorgu')">IP Sorgula</strong> sekmesini kullanın — hem CrowdSec hem RTBH durumu tek ekranda görünür.
             </div>
         </div>
 
@@ -474,44 +457,7 @@
             } catch(e) { wrap.innerHTML = `<div class="card">${hataHTML('Yüklenemedi: ' + e.message)}</div>`; }
         }
 
-        async function rtbhSorgula() {
-            const ip  = document.getElementById('rtbhQueryInput').value.trim();
-            const out = document.getElementById('rtbh-result');
-            if (!ip) { toastGoster('Lütfen bir IP adresi girin.', 'error'); return; }
-            out.innerHTML = loaderHTML();
-            try {
-                const res  = await fetch('/api/check-rtbh', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ip})
-                });
-                const veri = await res.json();
-                if (!veri.success) { out.innerHTML = hataHTML(veri.error); return; }
-
-                if (veri.in_feed) {
-                    out.innerHTML = `
-                        <div class="result-banner red" style="margin-top:.75rem">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                            </svg>
-                            <span><strong>${ip}</strong> RTBH feed'inde mevcut!</span>
-                        </div>
-                        <div class="ip-meta" style="margin-top:.5rem">
-                            <span>Eşleşen blok:</span>
-                            <span class="ip-badge">${veri.matched_cidr}</span>
-                        </div>`;
-                } else {
-                    out.innerHTML = `
-                        <div class="result-banner green" style="margin-top:.75rem">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                            </svg>
-                            <span><strong>${ip}</strong> RTBH feed'inde bulunmuyor.</span>
-                        </div>`;
-                }
-            } catch(e) { out.innerHTML = hataHTML('Sorgu başarısız: ' + e.message); }
-        }
-        document.getElementById('rtbhQueryInput')?.addEventListener('keyup', e => { if (e.key === 'Enter') rtbhSorgula(); });
+        // rtbhSorgula kaldırıldı — artık IP Sorgula ekranından yapılıyor
 
         // ─── ALERTLER ────────────────────────────────────────────────────────────────
         let _alertData   = [];
@@ -531,9 +477,13 @@
                 const ip    = a.source?.ip || '—';
                 const ulke  = ulkeKodu(a.source?.country);
                 const tarih = a.created_at ? new Date(a.created_at).toLocaleString('tr-TR') : '—';
-                const durum = a.remediation
-                    ? '<span class="badge-pill red">Engellendi</span>'
-                    : '<span class="badge-pill blue">İzleniyor</span>';
+                const remBadge = a.remediation
+                    ? '<span class="badge-pill red" title="Alert oluştuğunda ban kararı uygulandı (geçmiş)">Önlem Alındı</span>'
+                    : '<span class="badge-pill blue" title="Karar uygulanmadı, yalnızca izlendi">İzlendi</span>';
+                const blockBadges = (a.blocks || []).map(b => {
+                    const col = b === 'RTBH' ? '#f59e0b' : 'var(--accent)';
+                    return `<span class="badge-pill" style="background:${col};color:#000;font-size:.68rem;font-weight:700">${b}</span>`;
+                }).join(' ');
                 const ipHtml = ip !== '—'
                     ? `<span class="ip-badge ip-clickable" title="IP Sorgula" onclick="ipSorgulaTab('${ip}')">${ip}</span>`
                     : '<span class="ip-badge">—</span>';
@@ -542,7 +492,7 @@
                     <td data-label="Senaryo"><span class="reason"><i></i>${a.scenario || '—'}</span></td>
                     <td data-label="Olay" style="color:var(--text-secondary)">${a.events_count ?? '—'}</td>
                     <td data-label="Tarih" style="color:var(--text-secondary);font-size:.8rem">${tarih}</td>
-                    <td data-label="Durum">${durum}</td>
+                    <td data-label="Durum"><div style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center">${remBadge}${blockBadges ? blockBadges : ''}</div></td>
                 </tr>`;
             }).join('');
 
@@ -612,34 +562,47 @@
                     ? `${bayrak(d.country_code)} ${d.country}`
                     : '';
 
-                if (!veri.banned) {
-                    out.innerHTML =
-                        `<div class="result-banner green">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <span><strong>${ip}</strong> şu an yasaklı değil.</span>
-                </div>`
-                        + (asInfo || ulkeBilgi ? `<div class="ip-meta">${ulkeBilgi}${asInfo}</div>` : '');
-                    return;
-                }
+                // CrowdSec banner
+                const csBanner = veri.banned
+                    ? `<div class="result-banner red">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>🔵 <strong>CrowdSec:</strong> <strong>${ip}</strong> şu an aktif ban altında.</span>
+                      </div>`
+                    : `<div class="result-banner green">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>🔵 <strong>CrowdSec:</strong> <strong>${ip}</strong> şu an aktif ban yok.</span>
+                      </div>`;
 
-                out.innerHTML =
-                    `<div class="result-banner red">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span><strong>${ip}</strong> yasaklı!</span>
-            </div>`
+                // RTBH banner
+                const rtbhBanner = veri.rtbh
+                    ? `<div class="result-banner red" style="border-color:#f59e0b;background:rgba(245,158,11,.1)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <span style="color:#f59e0b">🟡 <strong>RTBH:</strong> <strong>${ip}</strong> feed'inde engelli — blok: <code>${veri.rtbh}</code></span>
+                      </div>`
+                    : `<div class="result-banner green">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>🟡 <strong>RTBH:</strong> <strong>${ip}</strong> feed'inde yok.</span>
+                      </div>`;
+
+                const kararTablosu = veri.banned
+                    ? `<table style="margin-top:1rem"><thead><tr>
+                            <th>Tür</th><th>Sebep</th><th>Kalan Süre</th><th>Kaynak</th>
+                        </tr></thead><tbody>`
+                        + veri.data.map(d =>
+                            `<tr class="item-row">
+                                <td data-label="Tür">${d.type}</td>
+                                <td data-label="Sebep"><span class="reason"><i></i>${d.reason || '—'}</span></td>
+                                <td data-label="Süre" style="color:var(--text-secondary)">${d.duration || '—'}</td>
+                                <td data-label="Kaynak" style="color:var(--text-secondary)">${d.origin || '—'}</td>
+                            </tr>`
+                        ).join('')
+                        + '</tbody></table>'
+                    : '';
+
+                out.innerHTML = csBanner + rtbhBanner
                     + (asInfo || ulkeBilgi ? `<div class="ip-meta">${ulkeBilgi}${asInfo}</div>` : '')
-                    + `<table style="margin-top:1rem"><thead><tr>
-                <th>Tür</th><th>Sebep</th><th>Kalan Süre</th><th>Kaynak</th>
-               </tr></thead><tbody>`
-                    + veri.data.map(d =>
-                        `<tr class="item-row">
-                    <td data-label="Tür">${d.type}</td>
-                    <td data-label="Sebep"><span class="reason"><i></i>${d.reason || '—'}</span></td>
-                    <td data-label="Süre" style="color:var(--text-secondary)">${d.duration || '—'}</td>
-                    <td data-label="Kaynak" style="color:var(--text-secondary)">${d.origin || '—'}</td>
-                </tr>`
-                    ).join('')
-                    + '</tbody></table>';
+                    + kararTablosu;
+
             } catch (e) { out.innerHTML = hataHTML('Sorgu başarısız: ' + e.message); }
         }
         document.getElementById('queryInput').addEventListener('keyup', e => { if (e.key === 'Enter') ipSorgula(); });
