@@ -113,6 +113,7 @@ crowdsec-gui altındaki dosyaları aşağıdaki ağaç yapısına göre kopyalay
 Sanal ortam ve paketleri kurun.
 ```bash
 cd /opt/crowdsec-gui
+source venv/bin/activate
 sudo -u www-data python3 -m venv venv
 sudo -u www-data /opt/crowdsec-gui/venv/bin/pip install flask bcrypt
 ```
