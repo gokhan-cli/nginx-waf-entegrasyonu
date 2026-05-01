@@ -138,12 +138,14 @@ After=network.target
 User=www-data
 Group=www-data
 WorkingDirectory=/opt/crowdsec-gui
-Environment="PATH=/opt/crowdsec-gui/venv/bin:/usr/local/bin:/usr/bin:/bin"
-ExecStart=/usr/bin/gunicorn -w 4 -b 0.0.0.0:5000 app:app
+# venv içindeki gunicorn'u doğrudan çağırmak en güvenli yoldur
+ExecStart=/opt/crowdsec-gui/venv/bin/gunicorn -w 4 -b 0.0.0.0:5000 app:app
 Restart=always
+# Hataları daha net görmek için log seviyesini artırabilirsin
+Environment="PYTHONPATH=/opt/crowdsec-gui"
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.targett
 ```
 
 crowdsec uygulamasına arkaplanda düzgün çalışması için yetkileri ayarlayın.
