@@ -614,3 +614,5 @@ if __name__ == '__main__':
     # Gunicorn ile çalışırken bu blok hiç çalışmaz.
     # Yalnızca "python app.py" ile yerel test için kullanılır.
     app.run(host='0.0.0.0', port=5001, debug=False)
+root@ubuntu-Standard-PC-i440FX-PIIX-1996:/opt/crowdsec-gui/static# 
+
