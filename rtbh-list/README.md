@@ -64,6 +64,19 @@ Persistent=true
 WantedBy=timers.target
 EOF
 
+sudo sed -i '/ipset swap "\$TMP_SET"/i\
+# Feed'\''i Flask için diske kaydet\
+mkdir -p /var/cache/cli-rtbh\
+echo "$IPS" > /var/cache/cli-rtbh/feed.txt\
+chmod 644 /var/cache/cli-rtbh/feed.txt\
+' /usr/local/bin/cli-feed-update.sh
+
+# İlk kez çalıştır
+sudo /usr/local/bin/cli-feed-update.sh
+
+sudo systemctl restart crowdsec-gui
+
+
 sudo systemctl daemon-reload
 sudo systemctl enable --now cli-feed-update.timer
 # Kontrol
